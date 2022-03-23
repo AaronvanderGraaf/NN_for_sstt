@@ -2,6 +2,8 @@ import os, sys, pickle, math, argparse
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from tensorflow.keras.models import model_from_json
+from sklearn.metrics import roc_auc_score,roc_curve, auc
 
 seed=400
 np.random.seed(seed)
@@ -51,6 +53,68 @@ def Plot_Metrics(history, path_tosave):
     plt.savefig(saveit)
     plt.show()
 
+def Save_Model(model, file_name, output_dir):
+    job_suff = "_{}".format(file_name)
+    arch_name = "architecture{}.json".format(job_suff)
+    weights_name = "weights{}.h5".format(job_suff)
+
+    mkdir_p(output_dir)
+    arch_name = "{}/{}".format(output_dir, arch_name)
+    weights_name = "{}/{}".format(output_dir, weights_name)
+
+    print("Saving architecture to: {}".format(os.path.abspath(arch_name)))
+    print("Saving weights to     : {}".format(os.path.abspath(weights_name)))
+    with open(arch_name, 'w') as arch_file :
+        arch_file.write(model.to_json())
+    model.save_weights(weights_name)
+
+
+def Load_Model(model_name, folder):
+    arch_path = folder + "/architecture_{}.json".format(model_name)
+    weights_path = folder + "/weights_{}.h5".format(model_name)
+    print("Loading model architecture and weights ({}, {})".format(os.path.abspath(arch_path), os.path.abspath(weights_path)))
+    json_file = open(os.path.abspath(arch_path), 'r')
+    loaded_model = json_file.read()
+    json_file.close()
+    loaded_model = model_from_json(loaded_model)
+    loaded_model.load_weights(os.path.abspath(weights_path))
+    return loaded_model
+
+def Plot_NN_Output(model, train, test, log=True):
+    nn_scores_test = model.predict(test[0], verbose = True)
+    nn_scores = model.predict(train[0], verbose = True)
+    fig = plt.figure()
+    plt.grid(color='k', which='both', linestyle='--', lw=0.5, alpha=0.1, zorder = 0)
+    plt.xlabel("NN output", horizontalalignment='right', x=1)
+    plt.xlim([0,1])
+    plt.ylabel("Density")
+    if log == True:
+        plt.yscale('log')
+    histargs = {"bins":40, "range":(0,1.), "density":True, "histtype":'step'}
+    plt.hist(nn_scores_test[test[1]==1],label = "Test_Signal", **histargs)
+    plt.hist(nn_scores_test[test[1]==0],label = "Test_Background", **histargs)
+    plt.hist(nn_scores[train[1]==1],label = "Train_Signal", **histargs)
+    plt.hist(nn_scores[train[1]==0],label = "Train_Background", **histargs)
+    plt.legend(loc='upper center', frameon=False,)
+
+def plot_roc_curve(model,data,path_tosave):
+    pred = model.predict(data[0])
+    truth = data[1]
+    fpr, tpr, thr = roc_curve(truth, pred)
+    roc_auc = auc(fpr, tpr)
+
+    fig = plt.figure()
+    plt.plot(fpr, tpr, color='darkorange',
+             label='ROC curve (area = {:.2f})'.format(roc_auc))
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc="lower right")
+    plt.savefig(path_tosave+"/ROC.png")
+    plt.show()
+
 def mkdir_p(path) :
     import errno
     """
@@ -65,135 +129,6 @@ def mkdir_p(path) :
             pass
         else :
             raise
-
-def make_nn_output_plots_oddeven( path_tosave, model = None, inputs = None, samples = None, targets = None, events=None) :
-
-    #inputs_tek = inputs[events % 2==1]
-    #inputs_cift = inputs[events % 2==0]
-
-    ## Workaround if no eventnumbers are used:
-    # Shuffle + split into two equal size arrays
-    np.random.shuffle(inputs)
-    inputs_tek = inputs_test[0:int(inputs.shape[0]/2),:]
-    inputs_cift = inputs_test[int(inputs.shape[0]/2):int(inputs_test.shape[0]),:]
-
-    nn_scores = np.ones([targets.size,2])
-    nn_scores_tek = model[0].predict(inputs_tek,verbose = True)
-    nn_scores_cift = model[1].predict(inputs_cift,verbose = True)
-    nn_scores[0:int(inputs.shape[0]/2),0] = nn_scores_tek.flatten()
-    nn_scores[0:int(inputs.shape[0]/2),1] = abs(nn_scores_tek - 1).flatten()
-    nn_scores[int(inputs.shape[0]/2):int(inputs.shape[0]),0] = nn_scores_cift.flatten()
-    nn_scores[int(inputs.shape[0]/2):int(inputs.shape[0]),1] = abs(nn_scores_cift - 1).flatten()
-    class_labels = set(targets)
-    targets_list = list(targets)
-    nn_scores_dict = {}
-
-    # index the sample names by their class label
-    names = {}
-    for sample in samples :
-        names[sample.class_label()] = sample.name()
-
-    # break up the predicted scores by the class label
-    for ilabel, label in enumerate(class_labels) :
-        # left-most appearance of the label
-        left = targets_list.index(label)
-        # right-most appearance of the label
-        right = len(targets_list) - 1 - targets_list[::-1].index(label)
-        nn_scores_dict[label] = nn_scores[left:right+1]
-
-    # start plotting
-    for label in class_labels :
-        #fig, ax = plt.subplots(1,1)
-        fig = plt.figure()
-        plt.grid(color='k', which='both', linestyle='--', lw=0.5, alpha=0.1, zorder = 0)
-        plt.xlabel( "NN output for label {}".format(names[label]), horizontalalignment='right', x=1)
-        #ax.set_xlim([1e-2,1.0])
-        plt.xlim([0,1])
-        #plt.yscale('log')
-        histargs = {"bins":20, "range":(0,1.), "density":True, "histtype":'step'}
-        #binning = np.arange(0,1,0.02)
-        #centers = (binning[1:-2] + binning[2:-1])/2
-        #ax.set_xlim((centers[0]-0.1, centers[-1]+0.1))
-        for sample_label in nn_scores_dict :
-            sample_scores_for_label = nn_scores_dict[sample_label][:]
-            print(sample_scores_for_label)
-            #sample_weights = sample_with_label(sample_label, samples).eventweights
-
-            #yields, _ = np.histogram(sample_scores_for_label, bins = binning)
-            plt.hist(sample_scores_for_label,label = names[sample_label], **histargs)
-            #yields = yields/yields.sum()
-            #ax.step(centers, yields[1:-1], label = names[sample_label], where = 'mid')
-
-            #ax.hist(sample_scores_for_label, bins = binning, alpha = 0.3, label = names[sample_label], density = True)
-        plt.legend(loc='best', frameon = False)
-        savename = "nn_outputs_class_{}.pdf".format( names[label])
-
-        savename = "{}/{}".format(path_tosave, savename)
-        plt.savefig(savename, bbox_inches = 'tight', dpi = 200)
-       # savename = "nn_outputs_{}_class_{}.pdf".format(path_tosave, names[label])
-
-     #   savename = "{}/{}".format(path_tosave, savename)
-     #   plt.savefig(savename, bbox_inches = 'tight', dpi = 200)
-
-    return nn_scores
-
-def make_nn_output_plots( model = None, inputs = None, samples = None, targets = None) :
-
-    # set of scores for each label: shape = (n_samples, n_outputs)
-    nn_scores = model.predict(inputs,verbose = True)
-
-    class_labels = set(targets)
-    targets_list = list(targets)
-    nn_scores_dict = {}
-
-    # index the sample names by their class label
-    names = {}
-    for sample in samples :
-        names[sample.class_label()] = sample.name()
-
-    # break up the predicted scores by the class label
-    for ilabel, label in enumerate(class_labels) :
-        # left-most appearance of the label
-        left = targets_list.index(label)
-        # right-most appearance of the label
-        right = len(targets_list) - 1 - targets_list[::-1].index(label)
-        nn_scores_dict[label] = nn_scores[left:right+1]
-
-    # start plotting
-    for label in class_labels :
-        #fig, ax = plt.subplots(1,1)
-        fig = plt.figure()
-        plt.grid(color='k', which='both', linestyle='--', lw=0.5, alpha=0.1, zorder = 0)
-        plt.xlabel( "NN output for label {}".format(names[label]), horizontalalignment='right', x=1)
-        #ax.set_xlim([1e-2,1.0])
-        plt.xlim([0,1])
-        #plt.yscale('log')
-        histargs = {"bins":20, "range":(0,1.), "density":True, "histtype":'step'}
-        #binning = np.arange(0,1,0.02)
-        #centers = (binning[1:-2] + binning[2:-1])/2
-        #ax.set_xlim((centers[0]-0.1, centers[-1]+0.1))
-        for sample_label in nn_scores_dict :
-            sample_scores_for_label = nn_scores_dict[sample_label][:]
-            print(sample_scores_for_label)
-            #sample_weights = sample_with_label(sample_label, samples).eventweights
-
-            #yields, _ = np.histogram(sample_scores_for_label, bins = binning)
-            plt.hist(sample_scores_for_label,label = names[sample_label], **histargs)
-            #yields = yields/yields.sum()
-            #ax.step(centers, yields[1:-1], label = names[sample_label], where = 'mid')
-
-            #ax.hist(sample_scores_for_label, bins = binning, alpha = 0.3, label = names[sample_label], density = True)
-        plt.legend(loc='best', frameon = False)
-        savename = "nn_outputs_class_{}.pdf".format( names[label])
-
-        savename = "{}/{}".format(path_tosave, savename)
-        plt.savefig(savename, bbox_inches = 'tight', dpi = 200)
-       # savename = "nn_outputs_{}_class_{}.pdf".format(path_tosave, names[label])
-
-     #   savename = "{}/{}".format(path_tosave, savename)
-     #   plt.savefig(savename, bbox_inches = 'tight', dpi = 200)
-
-    return nn_scores
 
 def ScaleWeights(y,w):
     sum_wpos = sum( w[i] for i in range(len(y)) if y[i] == 1.0  )
@@ -215,13 +150,3 @@ def ScaleWeights(y,w):
     print ('Weights::        W(1)=%g, W(0)=%g' % (sum_wpos, sum_wneg))
     print ('Scaled weights:: W(1)=%g, W(0)=%g' % (sum_wpos_check, sum_wneg_check))
     print ('==============================================================')
-
-def ScaleWeightsSignal(w,y):
-    sumi = sum( w[i] for i in range(len(y)) if y[i] == 1.0 )
-
-
-    for i in range(len(w)):
-      if (y[i]==1.0):
-        w[i] = sumi/len(w)
-      else:
-        w[i] = w[i]
