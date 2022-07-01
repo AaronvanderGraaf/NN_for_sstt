@@ -1,0 +1,16 @@
+name: sstt
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - matplotlib=3.2.2
+  - progressbar2
+  - pandas=1.1.5
+  - uproot=4.1.9
+  - scikit-learn=0.22.2.post1
+  - tensorflow=2.4.1
+  - keras=2.4.3
+  - Keras-Preprocessing==1.1.2
+  - h5py=2.10.0
+  - root_numpy
+  - seaborn=0.11.1
