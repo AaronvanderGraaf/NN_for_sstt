@@ -180,7 +180,7 @@ def Find_Eff_Cut(Sig, Bkg, Signal_Eff):
             return 0, 0
         i += 1
         Sig_Eff = Sig[Sig > Cut[i]].size/Sig.size
-    Bkg_Eff = Bkg[Bkg > Cut[i]].size/Bkg.size
+    Bkg_Eff = Bkg[Bkg < Cut[i]].size/Bkg.size
     print(f"Cut_Value: {Cut[i]:.3f}")
     print(f"Sig_Eff: {Sig_Eff:.3f}")
     print(f"Bkg_Eff: {Bkg_Eff:.3f}")

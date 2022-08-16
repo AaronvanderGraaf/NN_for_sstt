@@ -114,6 +114,22 @@ def Train_Val_Test_Split(input, targets, weights, class_labels):
     return (X_train, y_train, weights_train, class_labels_train), (X_val, y_val, weights_val, class_labels_val), (X_test, y_test, weights_test, class_labels_test)
 
 def Create_Model_basic(input_shape):
+    layer_opts = dict( activation = 'relu', kernel_initializer = initializers.glorot_normal(seed=seed), kernel_regularizer=regularizers.l2(0.0001))
+    input_layer = Kl.Input(shape = input_shape )
+    x = Kl.Dense( 128, **layer_opts) (input_layer)
+    x = Kl.Dense( 128, **layer_opts) (input_layer)
+    x = Kl.Dense( 64, **layer_opts) (x)
+    x = Kl.Dense( 32, **layer_opts) (x)
+    x = Kl.Dense( 16, **layer_opts) (x)
+    x = Kl.Dense( 8, **layer_opts) (x)
+    y_pred = Kl.Dense( 1., activation = 'sigmoid', name = "OutputLayer" )(x)
+    model = Km.Model(inputs= input_layer, outputs=y_pred )
+    model_optimizer = Adam(lr=0.0001)
+    model.compile(optimizer=tf.keras.optimizers.Adam(),loss='binary_crossentropy', metrics = ['accuracy'])
+    model.summary()
+    return model
+
+def Create_Model_basic_old(input_shape):
     layer_opts = dict( activation = 'sigmoid', kernel_initializer = initializers.glorot_normal(seed=seed))
     input_layer = Kl.Input(shape = input_shape )
     x = Kl.Dense( 36, **layer_opts) (input_layer)

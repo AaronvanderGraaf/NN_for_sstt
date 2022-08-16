@@ -142,6 +142,7 @@ def build_combined_input(training_samples) :
         class_labels = np.array(targets)
         targets[class_labels==0] = 1
         targets[class_labels>0] = 0
+        targets[class_labels==10] = 1
     else:
         class_labels = np.NaN
 
