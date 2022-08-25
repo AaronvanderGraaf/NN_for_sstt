@@ -116,7 +116,7 @@ def Train_Val_Test_Split(input, targets, weights, class_labels):
 def Create_Model_basic(input_shape):
     layer_opts = dict( activation = 'relu', kernel_initializer = initializers.glorot_normal(seed=seed), kernel_regularizer=regularizers.l2(0.0001))
     input_layer = Kl.Input(shape = input_shape )
-    x = Kl.Dense( 128, **layer_opts) (input_layer)
+    #x = Kl.Dense( 128, **layer_opts) (input_layer)
     x = Kl.Dense( 128, **layer_opts) (input_layer)
     x = Kl.Dense( 64, **layer_opts) (x)
     x = Kl.Dense( 32, **layer_opts) (x)

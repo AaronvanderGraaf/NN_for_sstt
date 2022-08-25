@@ -37,28 +37,41 @@ def lr_step_decay(epoch) : #initial_lr, drop, epoch_to_drop) :
     #print('INFO LR Schedule: {}'.format(new_lr))
     return new_lr
 
-def Plot_Metrics_KFold(history, path_tosave):
+def Plot_Metrics_KFold(history, path_tosave, plot_name=''):
     mkdir_p(path_tosave)
     names = ["odd", "even"]
+    best_epochs = [np.argmin(history[0].history['val_loss']), np.argmin(history[1].history['val_loss'])]
+    fig = plt.figure()
     for x in range(0,len(history)):
         plt.plot(history[x].history['loss'], label='Train loss '+ names[x] )
         plt.plot(history[x].history['val_loss'], label='Val loss '+ names[x] )
-        plt.xlabel('epoch')
-        plt.ylabel('loss')
-        plt.legend(loc='upper right')
 
-    saveit = "{}/{}".format(path_tosave, "Loss_KFold.png")
+    ymin=plt.gca().get_ylim()[0]+ plt.gca().get_ylim()[1]*0.02
+    ymax=plt.gca().get_ylim()[1]
+
+    plt.vlines(best_epochs[0], ymin=ymin, ymax=ymax, color='red', linestyle='--', label='Best epoch '+ names[0], alpha=0.8, linewidth=1.3)
+    plt.vlines(best_epochs[1], ymin=ymin, ymax=ymax, color='darkorange', linestyle='--', label='Best epoch '+ names[1], alpha=0.8, linewidth=1.3)
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.legend(loc='upper center')
+    saveit = "{}/{}".format(path_tosave, str(plot_name)+"Loss.png")
     plt.savefig(saveit)
     plt.show()
 
+    fig = plt.figure()
     for x in range(0,len(history)):
         plt.plot(history[x].history['accuracy'], label='Train accuracy '+ names[x] )
         plt.plot(history[x].history['val_accuracy'], label='Val accuracy '+ names[x] )
-        plt.xlabel('epoch')
-        plt.ylabel('accuracy in %')
-        plt.legend(loc='lower right')
 
-    saveit = "{}/{}".format(path_tosave, "Acc_KFold.png")
+    ymin=plt.gca().get_ylim()[0]+ plt.gca().get_ylim()[1]*0.02
+    ymax=plt.gca().get_ylim()[1]
+    
+    plt.vlines(best_epochs[0], ymin=ymin, ymax=ymax, color='red', linestyle='--', label='Best epoch '+ names[0], alpha=0.8, linewidth=1.3)
+    plt.vlines(best_epochs[1], ymin=ymin, ymax=ymax, color='darkorange', linestyle='--', label='Best epoch '+ names[1], alpha=0.8, linewidth=1.3)
+    plt.xlabel('epoch')
+    plt.ylabel('accuracy in %')
+    plt.legend(loc='lower right')
+    saveit = "{}/{}".format(path_tosave, str(plot_name)+"Acc.png")
     plt.savefig(saveit)
     plt.show()
 
