@@ -8,7 +8,9 @@ def fit_function(x, a):
 def Plot_Fit(fit_result, wc, xs, string):
     plt.figure()
     plt.scatter(wc, xs, c='red', marker='o', label='uu')
-    plt.plot(wc, fit_function(wc, *fit_result), c='black', label=string + " Parameter = " + str(np.round(fit_result[0], 2)))
+    #plt.plot(wc, fit_function(wc, *fit_result), c='black', label=string + " Parameter = " + str(np.round(fit_result[0], 2)))
+    wc_range = np.linspace(wc.min(), wc.max(), 100)
+    plt.plot(wc_range, fit_function(wc_range, *fit_result), c='blue', label=string + " Parameter = " + str(np.round(fit_result[0], 2)))
     plt.xlabel('WC')
     plt.ylabel('cross section (pb)')
     plt.legend()
