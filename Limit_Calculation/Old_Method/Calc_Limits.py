@@ -30,7 +30,7 @@ def Format_Results(limit_array, string):
 plotting=True
 precision = 4
 nom_signal_norm = 1.94 + 0.048
-Final_Norm = 0.4 * 0.05
+Final_Norm = 1# set to 1 if no signal norm otherwise 0.4*0.05 or the according value
 
 tt_xs = 0.0973
 tbartbar_xs = 0.002418
@@ -46,9 +46,20 @@ nom_mu = 0.6225
 #qu1_mu = np.array([6.798, 4.898, 9.847])
 #qu8_mu = np.array([7.392, 5.326, 10.7])
 
-uu_mu = np.array([4.201, 2.847, 6.338])
-qu1_mu = np.array([6.824, 4.677, 10.18])
-qu8_mu = np.array([7.418, 5.085, 11.06])
+# Newer Limit with Signal Norm
+#uu_mu = np.array([4.201, 2.847, 6.338])
+#qu1_mu = np.array([6.824, 4.677, 10.18])
+#qu8_mu = np.array([7.418, 5.085, 11.06])
+
+# New Limits without Signal Norm (Full Asimov)
+#uu_mu = np.array([0.2101, 0.1424, 0.3169])
+#qu1_mu = np.array([0.3395, 0.2326, 0.5067])
+#qu8_mu = np.array([0.3692, 0.2530, 0.5508])
+
+# New Limits without Signal Norm (hybrid-Asimov)
+uu_mu = np.array([0.2323, 0.1585, 0.3483])
+qu1_mu = np.array([0.3663, 0.2517, 0.5445])
+qu8_mu = np.array([0.3969, 0.2728, 0.5900])
 
 uu_xs_norm_tt = np.array([133.8, 301.1, 535.2, 836.3]) * weight_mc_tt
 qu1_xs_norm_tt = np.array([99.11, 194.3, 396.4, 892.0]) * weight_mc_tt
