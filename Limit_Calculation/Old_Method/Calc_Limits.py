@@ -55,9 +55,17 @@ nom_mu = 0.6225
 #qu8_mu = np.array([0.3692, 0.2530, 0.5508])
 
 # New Limits without Signal Norm (hybrid-Asimov)
-uu_mu = np.array([0.2323, 0.1585, 0.3483])
-qu1_mu = np.array([0.3663, 0.2517, 0.5445])
-qu8_mu = np.array([0.3969, 0.2728, 0.5900])
+#uu_mu = np.array([0.2323, 0.1585, 0.3483])
+#qu1_mu = np.array([0.3663, 0.2517, 0.5445])
+#qu8_mu = np.array([0.3969, 0.2728, 0.5900])
+
+#New Limits without Signal Norm January 08.01.2024
+uu_mu = np.array([0.1706, 0.1192, 0.2461])
+qu1_mu = np.array([0.2314, 0.1627, 0.3341])
+qu8_mu = np.array([0.2483, 0.1745, 0.3587])
+
+# New Limit Stat Only
+#uu_mu = np.array([0.1277, 0.0893, 0.1850])
 
 uu_xs_norm_tt = np.array([133.8, 301.1, 535.2, 836.3]) * weight_mc_tt
 qu1_xs_norm_tt = np.array([99.11, 194.3, 396.4, 892.0]) * weight_mc_tt

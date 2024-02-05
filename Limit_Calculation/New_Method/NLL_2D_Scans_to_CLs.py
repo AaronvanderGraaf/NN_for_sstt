@@ -163,12 +163,23 @@ y_contour = np.concatenate([y_contour_pos, y_contour_neg])
 x_contour_68 = np.concatenate([x_contour_68_pos, x_contour_68_neg])
 y_contour_68 = np.concatenate([y_contour_68_pos, y_contour_68_neg])
 
+
+# Calculate the correlation matrix for the rows
+row_correlation_matrix = np.corrcoef(Z, rowvar=True)
+
+# Calculate the correlation matrix for the columns
+col_correlation_matrix = np.corrcoef(Z, rowvar=False)
+
+#print("Row Correlation Matrix:\n", row_correlation_matrix)
+#print("Column Correlation Matrix:\n", col_correlation_matrix)
+
 # Plot the contour line using the unique x and y values
 plt.plot(x_contour+x_distance/2, y_contour+y_distance/2, color='red', linewidth=2, label='95% CL')
 plt.plot(x_contour_68+x_distance/2, y_contour_68+y_distance/2, color='orange', linewidth=2, label='68% CL')
 
 # Add legend
-plt.legend()
+plt.legend(loc='upper left', bbox_to_anchor=(0.7, 1))
+plt.tight_layout()
 
 # Show the plot
 #plt.show()
