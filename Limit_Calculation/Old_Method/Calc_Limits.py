@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+
 def fit_function(x, a):
     return a * x**2
 
@@ -20,13 +21,13 @@ def Plot_Fit(fit_result, wc, xs, string):
 def Format_Results(limit_array, string):
     result = np.round(np.array([limit_array[0], abs(limit_array[0]-limit_array[1]), abs(limit_array[0]-limit_array[2])]), precision)
 
-    print(string+ f' = {result[0]:.4f}_(-{result[1]:.4f})_(+{result[2]:.4f})')
+    print(string+ f' = {result[0]:.5f}_(-{result[1]:.5f})_(+{result[2]:.5f})')
 
     return result
 
 # Settings
 plotting=True
-precision = 4
+precision = 5
 nom_signal_norm = 1.94 + 0.048
 Final_Norm = 1# set to 1 if no signal norm otherwise 0.4*0.05 or the according value
 
@@ -66,6 +67,12 @@ qu8_mu = np.array([0.2483, 0.1745, 0.3587])
 
 # New Limit Stat Only
 #uu_mu = np.array([0.1277, 0.0893, 0.1850])
+
+# New Limit Feburary with new Root version with Norm SSTT Start value set to approx 0 
+uu_mu = np.array([0.121866, 0.085313, 0.176841])
+
+# New Limit Feburary with new Root version with Norm SSTT Start value set to approx 0 AND StatOnly!!!
+#uu_mu = np.array([0.1115, 0.0776, 0.1625])
 
 uu_xs_norm_tt = np.array([133.8, 301.1, 535.2, 836.3]) * weight_mc_tt
 qu1_xs_norm_tt = np.array([99.11, 194.3, 396.4, 892.0]) * weight_mc_tt
